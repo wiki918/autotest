@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load bootstrap3 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+    <title>Env</title>
+    <script src="//libs.baidu.com/jquery/1.10.2/jquery.min.js">
+    </script>
+	<script src="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="../static/frame/layui/css/layui.css">
+    <link rel="stylesheet" href="../static/frame/static/css/style.css">
+    <script>
+        $(function(){
+            edit();
+            add();
+            del();
+            paging();
+            funisRepeat();
+        });
+        //编辑
+        function edit(){
+            $("#btn2").click(function(){
+                $("#myAlert").css("display","none");
+                $("#myAlert1").css("display","none");
+                var count=0;
+                var email=new Array();
+                var elements=$(".ipt");
+                var email_value
+                $("#table").find(":checkbox:checked").each(function(){
+                    email_value=$(this).parent()
+                    for (var i=0;i<elements.length;i++){
+                        email_value=email_value.next()
+                        //alert(email_value.text());
+                        email[i]=email_value.text();
+                    }
+                    //alert(email_subject)
+                    count++;
+                });
+                if (count==1)
+                {
+                    //alert(env);
+                    for (var i=0;i<email.length;i++){
+                        //alert(email[i])
+                        $(elements[i]).val(email[i]);
+                    }
+                    $('#editMyModal').modal("show");
+                }
+                else{
+                    $("#myAlert").css("display","inherit");
+                }
+            });
+        }
+        //新增
+        function add(){
+            $("#btn1").click(function(){
+                $("#myAlert").css("display","none");
+                $("#myAlert1").css("display","none");
+            });
+        }
+        //删除
+        function del(){
+            $("#btn3").click(function(){
+                var env_ids=new Array();
+                var count=0;
+                var i=0;
+                $("#myAlert").css("display","none");
+                $("#myAlert1").css("display","none");
+                $("#table").find(":checkbox:checked").each(function(){
+                    env_id = $(this).parent().next().text();
+                    if (env_id != ""){
+                        env_ids[i++]=env_id;
+                    }
+                    count++;
+                });
+                //alert(env_ids);
+                if (count==0){
+                    $("#myAlert1").css("display","inherit");
+                    return false;
+                }
+                else{
+                    $("#ipt1").val(env_ids);
+                    $("#del").submit();
+                }
+            });
+        }
+        //分页
+        function paging(){
+            function merge(btn){
+                element_subject=$("#ipt2").val();
+                element_username=$("#ipt3").val();
+                element_receivers=$("#ipt4").val();
+                oldHref=$(btn).attr("href");
+                href=oldHref+"&receivers="+element_receivers+"&username="+element_username+"&subject="+element_subject
+                $(btn).attr("href",href)
+            }
+            var element_subject,element_username,element_receivers;
+            $("#first").click(function(){
+                merge(this);
+            });
+            $("#previous").click(function(){
+                merge(this);
+            });
+            $("#next").click(function(){
+                merge(this);
+            });
+            $("#last").click(function(){
+                merge(this);
+            });
+        }
+        //判断提交的表单描标题头部信息是否重复
+        function funisRepeat(){
+            var isRepeat;
+            isRepeat="{{ isRepeat }}";
+            if (isRepeat==1){
+                alert("邮箱配置重复");
+            }
+        }
+    </script>
+</head>
+<body role="document">
+    <!--环境搜索栏-->
+    <div class="page-header" >
+        <form class="navbar-form" method="GET" action="/email_search_name/">
+            <div class="form-group">
+                <input id="ipt2" name="subject" type="text" placeholder="标题头部信息" class="form-control" value={{ email_subject }}>
+                <input  id="ipt3" name="username" type="text" placeholder="用户名" class="form-control" value={{ email_username }}>
+                <input id="ipt4" name="receivers" type="text" placeholder="接收人邮箱" class="form-control" value={{ email_receivers }}>
+            </div>
+            <button id="btn4" type="submit" class="btn layui-btn" >搜索</button>
+            {% csrf_token %}
+        </form>
+    </div>
+    <!--警告框-->
+    <div id="myAlert" class="alert alert-warning" style="display: none">
+	    <a href="#" class="close" data-dismiss="alert">&times;</a>
+	    <strong>警告！</strong>编辑时只能勾选一条。
+    </div>
+    <div id="myAlert1" class="alert alert-warning" style="display: none">
+	    <a href="#" class="close" data-dismiss="alert">&times;</a>
+	    <strong>警告！</strong>删除时一定要勾选一条。
+    </div>
+    <!--按钮-->
+    <div class="btn-toolbar" role="toolbar">
+        <div class="btn-group">
+            <button id="btn1" class="btn layui-btn"  data-toggle="modal" data-target="#addMyModal" >
+                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>添加
+            </button>
+            <button id="btn2" class="btn layui-btn"  data-toggle="modal" data-target="#">
+                <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>修改
+            </button>
+            <form id="del" method="POST" action="/email_delete_data/" style="display:inline;">
+                <input id="ipt1" type="text" name="id" style="display:none"/>
+                <button id="btn3" type="onclick" class="btn layui-btn" >
+                    <span class="glyphicon glyphicon-minus" aria-hidden="true"></span>删除
+                </button>
+                {% csrf_token %}
+            </form>
+        </div>
+    </div>
+    <!--邮件列表-->
+    <div>
+        <div>
+            <table id="table" class="table table-striped">
+                <tr>
+                    <th>选中</th><th>id</th><th>发件人邮箱</th><th>收件人邮箱</th><th>SMTP服务器</th><th>SMTP服务器端口</th><th>用户名</th>
+                    <th>密码</th><th>发件人头部信息</th><th>收件人头部信息</th><th>标题头部信息</th>
+                </tr>
+                <tbody>
+                {% for email in emails %}
+                    <tr>
+                        <td id="che1"><input type="checkbox"/></td>
+                        <td>{{ email.id }}</td>
+                        <td>{{ email.sender }}</td>
+                        <td>{{ email.receivers }}</td>
+                        <td>{{ email.host_dir }}</td>
+                        <td>{{ email.email_port }}</td>
+                        <td>{{ email.username }}</td>
+                        <td>{{ email.passwd }}</td>
+                        <td>{{ email.Headerfrom }}</td>
+                        <td>{{ email.Headerto }}</td>
+                        <td>{{ email.subject }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- 模态框示例（Modal） -->
+    <!--新增-->
+    <div class="modal fade" id="addMyModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog" style="max-width:400px">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+					&times;
+				</button>
+				<h4 class="modal-title" id="myModalLabel">
+					新增邮箱配置
+				</h4>
+			</div>
+			<div class="modal-body">
+                <form role="form" method='POST' action="/email_add_data/">
+                    <div class="form-group">
+                        <label  for="sender">发件人邮箱</label>
+                        <input  type="text" class="form-control" name="sender" placeholder="请输入发件人邮箱" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="receivers">收件人邮箱</label>
+                        <input  type="text" class="form-control" name="receivers" placeholder="请输入收件人邮箱" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="host_dir">SMTP服务器</label>
+                        <input  type="text" class="form-control" name="host_dir" placeholder="请输入SMTP服务器" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="host_dir">SMTP服务器端口</label>
+                        <input  type="text" class="form-control" name="email_port" placeholder="请输入SMTP服务器端口" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="username">用户名</label>
+                        <input  type="text" class="form-control" name="username" placeholder="请输入用户名" required>
+                   </div>
+                    <div class="form-group">
+                        <label for="passwd">密码</label>
+                        <input  type="text" class="form-control" name="passwd" placeholder="请输入密码" required>
+                   </div>
+                    <div class="form-group">
+                        <label for="Headerfrom">发件人头部信息</label>
+                        <input  type="text" class="form-control" name="Headerfrom" placeholder="请输入发件人头部信息" required>
+                   </div>
+                    <div class="form-group">
+                        <label for="Headerto">收件人头部信息</label>
+                        <input  type="text" class="form-control" name="Headerto" placeholder="请输入收件人头部信息" required>
+                   </div>
+                    <div class="form-group">
+                        <label for="subject">标题头部信息</label>
+                        <input  type="text" class="form-control" name="subject" placeholder="请输入标题头部信息" required>
+                   </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn layui-btn" data-dismiss="modal">关闭
+				        </button>
+				        <button type="submit" class="btn layui-btn">
+					    提交
+				        </button>
+			        </div>
+                    {% csrf_token %}
+                </form>
+			</div>
+		</div><!-- /.modal-content -->
+	</div><!-- /.modal -->
+    </div>
+    <!-- 编辑 -->
+    <div class="modal fade" id="editMyModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog" style="max-width:400px">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+					&times;
+				</button>
+				<h4 class="modal-title" id="myModalLabel">
+					编辑邮件配置
+				</h4>
+			</div>
+			<div class="modal-body">
+                <form role="form" method='POST' action="/email_edit_data/">
+                    <div class="form-group" style="display: none">
+                        <label  for="id">id</label>
+                        <input  type="text" class="ipt form-control" name="id" placeholder="请输入id" >
+                    </div>
+                    <div class="form-group">
+                        <label  for="sender">发件人邮箱</label>
+                        <input  type="text" class="ipt form-control" name="sender" placeholder="请输入发件人邮箱" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="receivers">收件人邮箱</label>
+                        <input  type="text" class="ipt form-control" name="receivers" placeholder="请输入收件人邮箱" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="host_dir">SMTP服务器</label>
+                        <input  type="text" class="ipt form-control" name="host_dir" placeholder="请输入SMTP服务器" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="host_dir">SMTP服务器端口</label>
+                        <input  type="text" class="ipt form-control" name="email_port" placeholder="请输入SMTP服务器端口" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="username">用户名</label>
+                        <input  type="text" class="ipt form-control" name="username" placeholder="请输入用户名" required>
+                   </div>
+                    <div class="form-group">
+                        <label for="passwd">密码</label>
+                        <input  type="text" class="ipt form-control" name="passwd" placeholder="请输入密码" required>
+                   </div>
+                    <div class="form-group">
+                        <label for="Headerfrom">发件人头部信息</label>
+                        <input  type="text" class="ipt form-control" name="Headerfrom" placeholder="请输入发件人头部信息" required>
+                   </div>
+                    <div class="form-group">
+                        <label for="Headerto">收件人头部信息</label>
+                        <input  type="text" class="ipt form-control" name="Headerto" placeholder="请输入收件人头部信息" required>
+                   </div>
+                    <div class="form-group">
+                        <label for="subject">标题头部信息</label>
+                        <input  type="text" class="ipt form-control" name="subject" placeholder="请输入标题头部信息"  readonly="readonly" required>
+                   </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn layui-btn" data-dismiss="modal">关闭
+				        </button>
+				        <button type="submit" class="btn layui-btn">
+					    提交
+				        </button>
+			        </div>
+                    {% csrf_token %}
+                </form>
+			</div>
+		</div><!-- /.modal-content -->
+	</div><!-- /.modal -->
+    </div>
+    <!--分页器-->
+    <div style="text-align: right;">
+        <ul class="pagination pagination-sm">
+            <li>
+                <span class="current">
+                    Page {{ emails.number }} of {{ emails.paginator.num_pages }}
+                </span>
+            </li>
+            <li>
+                <a id="first" href="/email/?page=1">
+                    <span class="glyphicon glyphicon-fast-backward"></span>
+                </a>
+            </li>
+            <li>
+                {% if emails.has_previous %}
+                <a id="previous" href="/email/?page={{ emails.previous_page_number }}">
+                    <span class="glyphicon glyphicon-backward"></span>
+                </a>
+                {% endif %}
+            </li>
+            <li>
+                {% if emails.has_next %}
+                <a id="next" href="/email/?page={{ emails.next_page_number }}">
+                    <span class="glyphicon glyphicon-forward"></span>
+                </a>
+                {% endif %}
+            </li>
+            <li>
+                <a id="last" href="/email/?page={{ emails.paginator.num_pages }}">
+                    <span class="glyphicon glyphicon-fast-forward"></span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</body>
+</html>

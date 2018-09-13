@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load bootstrap3 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+    <title>Env</title>
+    <script src="//libs.baidu.com/jquery/1.10.2/jquery.min.js">
+    </script>
+	<script src="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="../static/frame/layui/css/layui.css">
+    <link rel="stylesheet" href="../static/frame/static/css/style.css">
+    <script>
+        //搜索或者搜索分页后去根据select返回的value去确定第几个option被选中
+        $(function(){
+            edit();
+            add();
+            del();
+            paging();
+            search();
+        });
+        //搜索或者搜索分页后去根据select返回的value去确定第几个option被选中
+        function get_option(elements,value){
+           $(elements).each(function(index,element){
+                if($(element).val()==value){
+                    $(element).attr("selected",true);
+                    //console.log($(element).val());
+                    return;
+                }
+            });
+        }
+        function search(){
+            var elementsStatus="#select1 option";
+            var valueStatus="{{ select }}";
+            get_option(elementsStatus,valueStatus);
+            var elementsstep="#selectstep option";
+            var selectstep="{{ selectstep }}";
+            //console.log(selectstep);
+            get_option(elementsstep,selectstep);
+            var elementsisselect="#selectisselect option";
+            var selectisselect="{{ selectisselect }}";
+            get_option(elementsisselect,selectisselect);
+        }
+        //编辑
+        function edit(){
+            $("#btn2").click(function(){
+                $("#myAlert").css("display","none");
+                $("#myAlert1").css("display","none");
+                var count=0;
+                var env_value;
+                var env=new Array();
+                var elements=$(".ipt");
+                $("#table").find(":checkbox:checked").each(function(){
+                    env_value=$(this).parent()
+                    for (var i=0;i<elements.length;i++){
+                        env_value=env_value.next()
+                        //alert(email_value.text());
+                        env[i]=env_value.text();
+                    }
+                    //alert(env)
+                    count++;
+                });
+                if (count==1)
+                {
+                    //alert(env);
+                    for (var i=0;i<env.length-1;i++){
+                        $(elements[i]).val(env[i]);
+                    }
+                    if (env[env.length-1]=="True"){
+                        $(elements[env.length-1]).prop('checked',true);
+                    }
+                    else{
+                        $(elements[env.length-1]).removeAttr('checked');
+                    }
+                    //初始化是否是查询和变量输入框
+                    if ($("#editvariable input").val()==""){
+                        $("#editisselect").removeAttr('checked');
+                        $("#editvariable").attr("style","display:None");
+                    }
+                    else{
+                        $("#editisselect").prop('checked',true);
+                        $("#editvariable").attr("style","display:Block");
+                    }
+                    //前置后置初始化
+                    if ($("#editsql_condition1").val()==1){
+                        $("#editsql_condition2").prop('checked',true);
+                        $("#editsql_condition1").removeAttr('checked');
+                    }
+                    else{
+                        $("#editsql_condition1").prop('checked',true);
+                        $("#editsql_condition2").removeAttr('checked');
+                    }
+                    $('#editMyModal').modal("show");
+                }
+                else{
+                    $("#myAlert").css("display","inherit");
+                }
+            });
+            isvariable("#editisselect","#editvariable");
+        }
+        //新增和编辑的时候根据该sql是否是查询判断变量输入框是否显示
+        function isvariable(checkbox,ipt){
+            $(checkbox).click(function() {
+                if($(checkbox).is(':checked')){
+                    $(ipt).attr("style","display:Block");
+                }
+                else{
+                    $(ipt).attr("style","display:None");
+                }
+            });
+        }
+        //新增
+        function add(){
+            $("#btn1").click(function(){
+                $("#myAlert").css("display","none");
+                $("#myAlert1").css("display","none");
+            });
+            isvariable("#isselect","#addvariable");
+        }
+        //删除
+        function del(){
+            $("#btn3").click(function(){
+                var env_ids=new Array();
+                var count=0;
+                var i=0;
+                $("#myAlert").css("display","none");
+                $("#myAlert1").css("display","none");
+                $("#table").find(":checkbox:checked").each(function() {
+                    env_id = $(this).parent().next().text();
+                    if (env_id != "") {
+                        env_ids[i++] = env_id;
+                    }
+                    count++;
+                });
+                //alert(env_ids);
+                if (count==0){
+                    $("#myAlert1").css("display","inherit");
+                    return false;
+                }
+                else{
+                    $("#ipt1").val(env_ids);
+                    $("#del").submit();
+                }
+            });
+        }
+        //分页
+        function paging(){
+            var elementselectstep,elementselectisselect,elementselect;
+            function merge(btn){
+                elementselectstep=$("#selectstep").val();
+                elementselectisselect=$("#selectisselect").val();
+                elementselect=$("#select1").val();
+                oldHref=$(btn).attr("href");
+                href=oldHref+"&step_name="+elementselectstep+"&selectisselect="+elementselectisselect+"&select="+elementselect;
+                $(btn).attr("href",href)
+            }
+            $("#first").click(function(){
+                merge(this);
+            });
+            $("#previous").click(function(){
+                merge(this);
+            });
+            $("#next").click(function(){
+                merge(this);
+            });
+            $("#last").click(function(){
+                merge(this);
+            });
+        }
+    </script>
+</head>
+<body role="document">
+    <!--环境搜索栏-->
+    <div class="page-header" >
+        <form class="navbar-form" method="GET" action="/sql_search_name/">
+            <div class="form-group">
+                <select id="selectstep" name="step_name" class="form-control">
+                    <option value="0" class="select">步骤</option>
+                    {% for step_name in step_names %}
+                        <option>{{ step_name }}</option>
+                    {% endfor %}
+                </select>
+                <select id="selectisselect" name='selectisselect' class="form-control" >
+                    <option  value="2"  class="select">是否是查询</option>
+                    <option value="1" class="select">查询</option>
+                    <option value="0" class="select">非查询</option>
+                </select>
+                <select id="select1" name='select' class="form-control" >
+                    <option  value="2"  class="select">状态</option>
+                    <option value="1" class="select">启动</option>
+                    <option value="0" class="select">关闭</option>
+                </select>
+            </div>
+            <button id="btn4" type="submit" class="btn layui-btn" >搜索</button>
+            {% csrf_token %}
+        </form>
+    </div>
+    <!--警告框-->
+    <div id="myAlert" class="alert alert-warning" style="display: none">
+	    <a href="#" class="close" data-dismiss="alert">&times;</a>
+	    <strong>警告！</strong>编辑时只能勾选一条。
+    </div>
+    <div id="myAlert1" class="alert alert-warning" style="display: none">
+	    <a href="#" class="close" data-dismiss="alert">&times;</a>
+	    <strong>警告！</strong>删除时一定要勾选一条。
+    </div>
+    <!--按钮-->
+    <div class="btn-toolbar" role="toolbar">
+        <div class="btn-group">
+            <button id="btn1" class="btn layui-btn"  data-toggle="modal" data-target="#addMyModal" >
+                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>添加
+            </button>
+            <button id="btn2" class="btn layui-btn"  data-toggle="modal" data-target="#">
+                <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>修改
+            </button>
+            <form id="del" method="POST" action="/sql_delete_data/" style="display:inline;">
+                <input id="ipt1" type="text" name="id" style="display:none"/>
+                <button id="btn3" type="onclick" class="btn layui-btn" >
+                    <span class="glyphicon glyphicon-minus" aria-hidden="true"></span>删除
+                </button>
+                {% csrf_token %}
+            </form>
+        </div>
+    </div>
+    <!--环境列表-->
+    <div>
+        <div>
+            <table id="table" class="table table-striped">
+                <tr>
+                    <th>选中</th><th>id</th><th>步骤名</th><th>是否是查询</th><th>变量</th><th>sql</th><th>前置或者后置</th><th>备注</th><th>状态</th>
+                </tr>
+                <tbody>
+                {% for sql in sqls %}
+                    <tr>
+                        <td id="che1"><input type="checkbox"/></td>
+                        <td>{{ sql.id }}</td>
+                        <td>{{ sql.step }}</td>
+                        <td>{{ sql.is_select }}</td>
+                        <td>{{ sql.variable }}</td>
+                        <td>{{ sql.sql }}</td>
+                        <td>{{ sql.sql_condition }}</td>
+                        <td>{{ sql.remake }}</td>
+                        <td>{{ sql.status }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- 模态框示例（Modal） -->
+    <!--新增-->
+    <div class="modal fade" id="addMyModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog" style="max-width:400px">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+					&times;
+				</button>
+				<h4 class="modal-title" id="myModalLabel">
+					新增sql
+				</h4>
+			</div>
+			<div class="modal-body">
+                <form role="form" method='POST' action="/sql_add_data/">
+                    <div class="form-group">
+                        <label  for="step_name" >步骤名</label>
+                        <select name="step_name" class="form-control" required>
+                            {% for step_name in step_names %}
+                            <option>{{ step_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group" >
+                        <label class="checkbox-inline">
+                            <input type="checkbox" name="isselect" id="isselect" checked> 是否是查询
+                        </label>
+                    </div>
+                    <div class="form-group" id="addvariable">
+                        <label  for="variable">变量</label>
+                        <input  type="text" class="form-control"  name="variable" placeholder="请输入变量">
+                    </div>
+                    <div class="form-group">
+                        <label  for="sql">sql</label>
+                        <input  type="text" class="form-control" name="sql" placeholder="请输入sql" required>
+                    </div>
+                    <div class="form-group" >
+                        <label class="radio-inline">
+                            <input type="radio" name="sql_condition" id="sql_condition1" value="0" checked> 前置
+                        </label>
+                        <label class="radio-inline">
+                            <input type="radio" name="sql_condition" id="sql_condition2" value="1"> 后置
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label for="remake">备注</label>
+                        <input  type="text" class="form-control" name="remake" placeholder="请输入备注">
+                    </div>
+                    <div class="form-group" >
+                        <label class="checkbox-inline">
+                            <input type="checkbox" name="status" id="optionsRadios1" checked> 状态
+                        </label>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn layui-btn" data-dismiss="modal">关闭
+				        </button>
+				        <button type="submit" class="btn layui-btn">
+					    提交
+				        </button>
+			        </div>
+                    {% csrf_token %}
+                </form>
+			</div>
+		</div><!-- /.modal-content -->
+	</div><!-- /.modal -->
+    </div>
+    <!-- 编辑 -->
+    <div class="modal fade" id="editMyModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog" style="max-width:400px">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+					&times;
+				</button>
+				<h4 class="modal-title" id="myModalLabel">
+					编辑sql
+				</h4>
+			</div>
+			<div class="modal-body">
+                <form role="form" method='POST' action="/sql_edit_data/">
+                    <div class="form-group" style="display: none">
+                        <label  for="id">id</label>
+                        <input  type="text" class="ipt form-control" name="id" placeholder="请输入id" >
+                    </div>
+                    <div class="form-group">
+                        <label  for="step_name" >步骤名</label>
+                        <select name="step_name" class="ipt form-control" required>
+                            {% for step_name in step_names %}
+                            <option>{{ step_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group" >
+                        <label class="checkbox-inline">
+                            <input type="checkbox" class="ipt" name="isselect" id="editisselect" checked> 是否是查询
+                        </label>
+                    </div>
+                    <div class="form-group" id="editvariable">
+                        <label  for="variable">变量</label>
+                        <input  type="text" class="ipt form-control"  name="variable" placeholder="请输入变量">
+                    </div>
+                    <div class="form-group">
+                        <label  for="sql">sql</label>
+                        <input  type="text" class="ipt form-control" name="sql" placeholder="请输入sql" required>
+                    </div>
+                    <div class="form-group" >
+                        <label class="radio-inline">
+                            <input type="radio" class="ipt" name="sql_condition"  id="editsql_condition1" value="0" checked> 前置
+                        </label>
+                        <label class="radio-inline">
+                            <input type="radio" name="sql_condition" id="editsql_condition2" value="1"> 后置
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label for="remake">备注</label>
+                        <input  type="text" class="ipt form-control" name="remake" placeholder="请输入备注">
+                    </div>
+                    <div class="form-group" >
+                        <label class="checkbox-inline">
+                            <input type="checkbox" name="status" class="ipt" id="optionsRadios1" checked> 状态
+                        </label>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn layui-btn" data-dismiss="modal">关闭
+				        </button>
+				        <button type="submit" class="btn layui-btn">
+					    提交
+				        </button>
+			        </div>
+                    {% csrf_token %}
+                </form>
+			</div>
+		</div><!-- /.modal-content -->
+	</div><!-- /.modal -->
+    </div>
+    <!--分页器-->
+    <div style="text-align: right;">
+        <ul class="pagination pagination-sm">
+            <li>
+                <span class="current">
+                    Page {{ sqls.number }} of {{ sqls.paginator.num_pages }}
+                </span>
+            </li>
+            <li>
+                <a id="first" href="/sql/?page=1">
+                    <span class="glyphicon glyphicon-fast-backward"></span>
+                </a>
+            </li>
+            <li>
+                {% if sqls.has_previous %}
+                <a id="previous" href="/sql/?page={{ sqls.previous_page_number }}">
+                    <span class="glyphicon glyphicon-backward"></span>
+                </a>
+                {% endif %}
+            </li>
+            <li>
+                {% if sqls.has_next %}
+                <a id="next" href="/sql/?page={{ sqls.next_page_number }}">
+                    <span class="glyphicon glyphicon-forward"></span>
+                </a>
+                {% endif %}
+            </li>
+            <li>
+                <a id="last" href="/sql/?page={{ sqls.paginator.num_pages }}">
+                    <span class="glyphicon glyphicon-fast-forward"></span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</body>
+</html>

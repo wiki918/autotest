@@ -1,0 +1,47 @@
+#!/usr/bin/python
+#-*- encoding:UTF-8 -*-
+
+from public.request import *
+from public.sqldb import *
+from public.log import *
+from public.run import *
+from public.sqldb import Transferip_db
+from public.mongodb import Transferip_mongodb
+import unittest,re,json
+class ${case_name}(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.transferlogname=Transferlogname()
+        cls.transferip_db=Transferip_db()
+        cls.transfermongodb = Transferip_mongodb()
+        api="${api}"
+        cls.url=cls.transferip_db.ip+api
+        pass
+
+    @classmethod
+    def tearDownClass(cls):
+        pass
+
+    def getAssertWay(self,assertway):
+        if assertway=="assertEqual":
+            Assertwaymessage="等于"
+        elif assertway=="assertNotEqual":
+            Assertwaymessage="不等于"
+        elif assertway=="assertRegexpMatches":
+            Assertwaymessage="包含"
+        elif assertway=="assertNotRegexpMatches":
+            Assertwaymessage="不包含"
+        elif assertway=="assertGreater":
+            Assertwaymessage="大于"
+        elif assertway=="assertGreaterEqual":
+            Assertwaymessage="大于等于"
+        elif assertway=="assertLess":
+            Assertwaymessage="小于"
+        elif assertway=="assertLessEqual":
+            Assertwaymessage="小于等于"
+        elif assertway=="assertIn":
+            Assertwaymessage="在列表中"
+        elif assertway=="assertNotIn":
+            Assertwaymessage="不在列表中"
+        return Assertwaymessage
+

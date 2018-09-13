@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load bootstrap3 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+    <title>Env</title>
+    <script src="//libs.baidu.com/jquery/1.10.2/jquery.min.js">
+    </script>
+	<script src="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="../static/frame/layui/css/layui.css">
+    <link rel="stylesheet" href="../static/frame/static/css/style.css">
+    <style>
+        #adddivbigemail{
+        width: 32px;
+        height: 20px;
+        border-radius: 50px;
+        position: relative;
+        }
+        #adddivsmallemail{
+            width: 15px;
+            height: 15px;
+            border-radius: 48px;
+            position: absolute;
+            background: white;
+            box-shadow: 0px 2px 4px rgba(0,0,0,0.4);
+        }
+        #adddivbig{
+        width: 32px;
+        height: 20px;
+        border-radius: 50px;
+        position: relative;
+        }
+        #adddivsmall{
+            width: 15px;
+            height: 15px;
+            border-radius: 48px;
+            position: absolute;
+            background: white;
+            box-shadow: 0px 2px 4px rgba(0,0,0,0.4);
+        }
+        .addopenbig{
+            background:rgb(26,161,148);
+        }
+        .addopensmall{
+            top: 2px;
+            right: 1px;
+        }
+        .addclosebig{
+            background: rgba(255,255,255,0.4);
+            border:2px solid rgba(0,0,0,0.15);
+            border-left: transparent;
+        }
+        .addclosesmall{
+            left: 1px;
+            top: 0px;
+            border:1px solid rgba(0,0,0,0.1);}
+        .selectbtn{
+            background: #DDDDDD;
+            border:1px solid dodgerblue;
+        }
+        .unselectbtn{
+            background: white;
+        }
+    </style>
+    <script>
+        //搜索或者搜索分页后去根据select返回的value去确定第几个option被选中
+        $(function(){
+            carry();
+            //add();
+            del();
+            paging();
+            search();
+            startTask();
+            close();
+            //process_finish();
+        });
+        //搜索或者搜索分页后去根据select返回的value去确定第几个option被选中
+        function get_option(elements,value){
+           $(elements).each(function(index,element){
+                if($(element).val()==value){
+                    $(element).attr("selected",true);
+                    //console.log($(element).val());
+                    return;
+                }
+            });
+        }
+        function search(){
+            var elementsStatus="#select1 option";
+            var valueStatus="{{ select }}";
+            get_option(elementsStatus,valueStatus);
+            var elementsProject="#selectproject option";
+            var selectproject="{{ selectproject }}";
+            get_option(elementsProject,selectproject);
+        }
+        //模态框关闭刷新当前页面数据避免一个attr的bug
+        function close(){
+            $("#editMyModal").on('hidden.bs.modal', function () {
+                //alert(1);
+                location.reload();
+            });
+        }
+        //是否要发送邮件
+        function send_email(){
+            $("#adddivbigemail").click(function(){
+                //把日程表关掉
+                $("#myid_msg").css("display","None");
+
+                if ($("#adddivbigemail").attr("class")=="addopenbig"){
+                    $("#adddivbigemail").prop("class","addclosebig");
+                    $("#adddivsmallemail").prop("class","addclosesmall");
+                    $("#emailul").prop("style","display:None");
+                    //删除定时属性
+                    $(".send_email").removeAttr("name");
+                }
+                else{
+                    $("#adddivbigemail").attr("class","addopenbig");
+                    $("#adddivsmallemail").attr("class","addopensmall");
+                    $("#emailul").attr("style","list-style-type: none;display:block");
+                    //添加定时属性
+                    $(".send_email").attr("name","subject");
+                }
+        });
+        }
+        //是否要使用定时任务
+        function schedule(){
+            $("#adddivbig").click(function(){
+                //把日程表关掉
+                $("#myid_msg").css("display","None");
+
+                if ($("#adddivbig").attr("class")=="addopenbig"){
+                    $("#adddivbig").prop("class","addclosebig");
+                    $("#adddivsmall").prop("class","addclosesmall");
+                    $("#scheduleul").prop("style","display:None");
+                    //删除定时属性
+                    $(".carryschedule").removeAttr("name");
+                }
+                else{
+                    $("#adddivbig").attr("class","addopenbig");
+                    $("#adddivsmall").attr("class","addopensmall");
+                    $("#scheduleul").attr("style","list-style-type: none;display:block");
+                    //添加定时属性
+                    $(".carryschedule").attr("name","schedule");
+                }
+        });
+        }
+
+        //执行
+        function carry(){
+            //把日程表提示关掉
+            $("#myid_msg").css("display","None");
+
+            $("#btn2").click(function(){
+                $('#prog_in').width(0+ '%');
+                $("#myAlert").css("display","none");
+                $("#myAlert1").css("display","none");
+                var count=0;
+                var env_value;
+                var env=new Array();
+                var elements=$(".ipt");
+                $("#table").find(":checkbox:checked").each(function(){
+                    env_value=$(this).parent()
+                    for (var i=0;i<elements.length;i++){
+                        env_value=env_value.next()
+                        //alert(env_value.text());
+                        env[i]=env_value.text();
+                    }
+                    //alert(env)
+                    count++;
+                });
+                if (count==1)
+                {
+                    //alert(env);
+                    for (var i=0;i<env.length-1;i++){
+                        if ((env[i]!="" && i<5) || i>=5){
+                            //console.log(env[i]);
+                            $(elements[i]).val(env[i]);
+                        }
+                    }
+                    if (env[env.length-1]=="True"){
+                        $(elements[env.length-1]).prop('checked',true);
+                    }
+                    else{
+                        $(elements[env.length-1]).removeAttr('checked');
+                    }
+                    $('#editMyModal').modal("show");
+                }
+                else{
+                    $("#myAlert").css("display","inherit");
+                }
+
+                schedule();
+                send_email();
+                //控制定时框
+                $("#showbtn").click(function(){
+                    $("#show2").modal("show");
+                    //获取定时的值
+                    var mintue,hour;
+                    function gettime(elemoption,elemname){
+                        var time="*"
+                        time=$(elemoption+":checked").val()
+                        if (time!="*"){
+                            time = $("input:checkbox[name="+elemname+"]:checked").map(function(index,elem) {
+                                return $(elem).val();
+                                }).get().join(',');
+                        }
+                        time=change(time);
+                        return time;
+                    }
+                    //当时间为空给一个默认值
+                    function change(time){
+                        if (time==""){
+                            time="1";
+                        }
+                        return time;
+                    }
+                    //分钟处理
+                    $("#gettime").click(function(){
+                        var minute=gettime("#min_appoint","\'minutepoint\'");
+                        var hour=gettime("#hour_appoint","\'hourpoint\'");
+                        var day=gettime("#day_appoint","\'daypoint\'");
+                        var month=gettime("#month_appoint","\'monthpoint\'");
+                        var week=gettime("#week_appoint","\'weekpoint\'");
+                        var time=minute+" "+hour+" "+day+" "+month+" "+week;
+                        $("#showbtn").val(time);
+                    });
+                });
+
+            });}
+        //新增
+        function add(){
+            $("#btn1").click(function(){
+                $("#myAlert").css("display","none");
+                $("#myAlert1").css("display","none");
+            });
+        }
+        //删除
+        function del(){
+            $("#btn3").click(function(){
+                var task_names=new Array();
+                var count=0;
+                var i=0;
+                $("#myAlert").css("display","none");
+                $("#myAlert1").css("display","none");
+                $("#table").find(":checkbox:checked").each(function() {
+                    task_name = $(this).parent().next().text();
+                    if (task_name != "") {
+                        task_names[i++] = task_name;
+                    }
+                    //alert(task_names);
+                    count++;
+                });
+                //alert(env_ids);
+                if (count==0){
+                    $("#myAlert1").css("display","inherit");
+                    return false;
+                }
+                else{
+                    $("#ipt1").val(task_names);
+                    $("#del").submit();
+                }
+            });
+        }
+        //启动定时任务
+        function startTask(){
+            $("#startTimingTask").click(function(){
+                $.ajax({url:"/start_timing_task/"});
+            });
+        }
+        //分页
+        function paging(){
+            function merge(btn){
+                elementtask_name=$("#ipt2").val();
+                oldHref=$(btn).attr("href");
+                href=oldHref+"&task_name="+elementtask_name
+                $(btn).attr("href",href)
+            }
+            var elementstep_name,elementcase_name,elementmethod,elementsteplevel,elementselect;
+            $("#first").click(function(){
+                merge(this);
+            });
+            $("#previous").click(function(){
+                merge(this);
+            });
+            $("#next").click(function(){
+                merge(this);
+            });
+            $("#last").click(function(){
+                merge(this);
+            });
+        }
+        //定时校验
+        function checkschedule(){
+            var reg=/^([0-9,]+|\*) ([0-9,]+|\*) ([0-9,]+|\*) ([0-9,]+|\*) ([0-6,]+|\*)$/;
+            if ($(".carryschedule").attr('name')=="schedule"){
+                //alert(reg.test($(".carryschedule").val()));
+                if (!$(".carryschedule").val().match(reg)){
+                    $("#myid_msg").css("display","inherit");
+                    return 0;
+                }
+                else{
+                    $("#myid_msg").css("display","None");
+                    return 1;
+                }
+            }
+            return 1;
+        }
+        //进度条
+        function progress_bar() {
+            var href,finishresult,num_progress,i;
+            i=1;
+            href = "/get_progress_bar/"
+            issubmit=checkschedule();
+            if (issubmit==1){
+                $("#carryform").removeAttr("onsubmit");
+                //成功后进度直接到100%
+                /*var get_progress =setInterval(function () {
+                $.get(href,function(finish){
+                    finishresult=finish['getfinish']
+                    if (finishresult == 1) {
+                        $('#prog_in').width(100 + '%');
+                        clearInterval(get_progress);
+                    }
+                    else{
+                        num_progress = i * 3;
+                        if (num_progress <= 95) {
+                            $('#prog_in').width(num_progress + '%');
+                        }
+                        i++;
+                    }
+                });
+
+            }, 100);*/
+            }
+        }
+    </script>
+</head>
+<body role="document">
+<style>#pop{position:absolute;border:solid 1px #000;min-height:200px}</style>
+    <!--环境搜索栏-->
+    <div class="page-header" >
+        <form class="navbar-form" method="GET" action="/task_search_name/">
+            <div class="form-group">
+                <input id="ipt2" name="task_name" type="text" placeholder="任务名" class="form-control" value={{ task_name }}>
+            </div>
+            <button id="btn4" type="submit" class="btn layui-btn" >搜索</button>
+            {% csrf_token %}
+        </form>
+    </div>
+    <!--警告框-->
+    <div id="myAlert" class="alert alert-warning" style="display: none">
+	    <a href="#" class="close" data-dismiss="alert">&times;</a>
+	    <strong>警告！</strong>执行时只能勾选一条。
+    </div>
+    <div id="myAlert1" class="alert alert-warning" style="display: none">
+	    <a href="#" class="close" data-dismiss="alert">&times;</a>
+	    <strong>警告！</strong>删除时一定要勾选一条。
+    </div>
+    <!--按钮-->
+    <div class="btn-toolbar" role="toolbar">
+        <div class="btn-group">
+            <button id="btn1" class="btn layui-btn" style="display: None" data-toggle="modal" data-target="#addMyModal" >
+                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>新增
+            </button>
+            <button id="btn2" class="btn layui-btn"  data-toggle="modal" data-target="#">
+                <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>执行
+            </button>
+            <form id="del" method="POST" action="/tasks_delete_data/" style="display:inline;">
+                <input id="ipt1" type="text" name="task_names" style="display:none"/>
+                <button id="btn3" type="onclick" class="btn layui-btn" >
+                    <span class="glyphicon glyphicon-minus" aria-hidden="true"></span>删除
+                </button>
+                {% csrf_token %}
+            </form>
+            <button id="startTimingTask" class="btn layui-btn"  data-toggle="modal" data-target="#">
+                <span class="glyphicon glyphicon-play-circle" aria-hidden="true"></span>启动全部定时任务
+            </button>
+        </div>
+    </div>
+    <!--任务列表-->
+    <div>
+        <div>
+            <table id="table" class="table table-striped">
+                <tr>
+                    <th>选中</th><th>任务名</th><th>环境</th><th>数据库</th><th>失败重跑次数</th><th>邮箱</th><th>执行规则</th><th>状态</th><th>备注</th>
+                </tr>
+                <tbody>
+                {% for task in tasks %}
+                    <tr>
+                        <td id="che1"><input type="checkbox"/></td>
+                        <td>{{ task.task_name }}</td>
+                        <td>{{ task.env_desc }}</td>
+                        <td>{{ task.db_remark }}</td>
+                        <td>{{ task.failcount }}</td>
+                        <td>{{ task.subject }}</td>
+                        <td>{{ task.task_run_time_regular }}</td>
+                        <td>{{ task.status }}</td>
+                        <td>{{ task.remark }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- 模态框示例（Modal） -->
+    <!--新增-->
+    <div class="modal fade" id="addMyModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog" style="max-width:400px">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+					&times;
+				</button>
+				<h4 class="modal-title" id="myModalLabel">
+					定时任务
+				</h4>
+			</div>
+			<div class="modal-body">
+                <form role="form" method='POST' action="/modules_add_data/">
+                    <div class="form-group">
+                        <label  for="modules_name">模块名</label>
+                        <input  type="text" class="form-control" name="modules_name" placeholder="请输入模块名" required>
+                    </div>
+                    <div class="form-group">
+                        <label  for="project_name" ></label>
+                        <select name="project_name" class="form-control" required>
+                            {% for project_name in project_names %}
+                            <option>{{ project_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label  for="testers">测试人员</label>
+                        <input  type="text" class="form-control" name="testers" placeholder="请输入测试人员" >
+                    </div>
+                    <div class="form-group">
+                        <label  for="developer">开发人员</label>
+                        <input  type="text" class="form-control" name="developer" placeholder="请输入开发人员" >
+                    </div>
+                    <div class="form-group">
+                        <label for="modules_desc">模块描述</label>
+                        <input  type="text" class="form-control" name="modules_desc" placeholder="请输入模块描述">
+                    </div>
+                    <div class="form-group" >
+                        <label class="checkbox-inline">
+                            <input type="checkbox" name="status" id="optionsRadios1" checked> 状态
+                        </label>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn layui-btn" data-dismiss="modal">关闭
+				        </button>
+				        <button type="submit" class="btn layui-btn">
+					    提交
+				        </button>
+			        </div>
+                    {% csrf_token %}
+                </form>
+			</div>
+		</div><!-- /.modal-content -->
+	</div><!-- /.modal -->
+    </div>
+    <!-- 执行 -->
+    <div class="modal fade" id="editMyModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog" style="max-width:400px">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+					&times;
+				</button>
+				<h4 class="modal-title" id="myModalLabel">
+					定时任务
+				</h4>
+			</div>
+			<div class="modal-body">
+                <form id="carryform" role="form" method='POST' action="/task_run/" onsubmit="return false;">
+                    <div class="form-group">
+                        <label  for="case_name">任务名</label>
+                        <input  type="text" class="ipt form-control" name="task_name" placeholder="请输入任务名" readonly="readonly" required>
+                    </div>
+                    <div class="form-group">
+                        <label  for="env_desc" >环境</label>
+                        <select name="env_desc" class="ipt form-control" required>
+                            {% for env_desc in env_descs %}
+                            <option>{{ env_desc }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label  for="database_desc" >数据库</label>
+                        <select name="database_desc" class="ipt form-control" >
+                            <option value="">请选择</option>
+                            {% for db_remark in db_remarks %}
+                            <option>{{ db_remark }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label  for="failcount">失败后重跑次数</label>
+                        <!--<input  type="number" class="form-control" name="failcount" value="2" placeholder="失败后重跑次数" required>-->
+                        <input  class="ipt form-control" name="failcount" value="2" placeholder="失败后重跑次数" required onkeyup="if(this.value.length==1){this.value=this.value.replace(/[^1-9]/g,'')}else{this.value=this.value.replace(/\D/g,'')}" onafterpaste="if(this.value.length==1){this.value=this.value.replace(/[^1-9]/g,'')}else{this.value=this.value.replace(/\D/g,'')}">
+                    </div>
+                    <div class="form-group">
+                        <label for="params" >是否发送邮件</label>
+                        <div id="adddivbigemail" class="addopenbig">
+                            <div id="adddivsmallemail" class="addopensmall"></div>
+                        </div>
+                        <ul id="emailul" style="list-style-type: none" >
+                        <li>
+                            <select name="subject" class="ipt form-control send_email" >
+                                {% for subject in subjects %}
+                                <option>{{ subject }}</option>
+                                {% endfor %}
+                            </select>
+                        </li>
+                        </ul>
+                    </div>
+                    <div class="form-group">
+                        <label for="params" >是否定时</label>
+                        <div id="adddivbig" class="addopenbig">
+                            <div id="adddivsmall" class="addopensmall"></div>
+                        </div>
+                       <ul id="scheduleul" style="list-style-type: none" >
+                            <li>
+                                <input  id="showbtn" type="text" class="ipt carryschedule form-control" placeholder="日程表" title="规则是:minute0-59 hour0-23 day1-31 month1-12 day_of_week0-6" name="schedule"  readonly="readonly"/>
+                                <span id="myid_msg" style="display:none;color:#ff0000;">错误日程表</span>
+                                <label class="checkbox-inline">
+                                    <input type="checkbox" class="ipt" name="status" id="optionsRadios1" checked> 状态
+                                </label>
+                            </li>
+                       </ul>
+                    </div>
+                    <div class="progress">
+                        <div id="prog_in" class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn layui-btn" data-dismiss="modal">关闭
+				        </button>
+				        <button onclick="progress_bar()" class="btn layui-btn">
+					    执行
+				        </button>
+			        </div>
+                    {% csrf_token %}
+                </form>
+			</div>
+		</div><!-- /.modal-content -->
+	</div><!-- /.modal -->
+    </div>
+
+    <!--定时选择器-->
+    <div class="modal fade  " id='show2'>
+        <div class="modal-dialog">
+            <div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+					&times;
+				</button>
+				<h4 class="modal-title" id="myModalLabel">
+					定时选择器
+				</h4>
+			</div>
+
+
+
+
+			    <div class="modal-body">
+                    <ul id="myTab" class="nav nav-tabs">
+                        <li class="active">
+                            <a href="#minute" data-toggle="tab">分钟</a>
+                        </li>
+	                    <li><a href="#hour" data-toggle="tab">小时</a></li>
+                        <li><a href="#day" data-toggle="tab">日</a></li>
+                        <li><a href="#month" data-toggle="tab">月</a></li>
+                        <li><a href="#week" data-toggle="tab">周</a></li>
+                    </ul>
+
+                    <div id="myTabContent" class="tab-content">
+                        <!--分钟选择-->
+                        <div class="form-group tab-pane fade in active" title="分钟" id="minute">
+                            <div class="line">
+                                <input type="radio" name="min" checked id="min_appoint" value="*">
+                                不指定</div>
+                            <div class="line">
+                                <input type="radio" name="min" id="min_appoint">
+                                指定</div>
+                            <div class="imp minList">
+                                <input type="checkbox" value="0" name="minutepoint">00
+                                <input type="checkbox" value="1" name="minutepoint">01
+                                <input type="checkbox" value="2" name="minutepoint">02
+                                <input type="checkbox" value="3" name="minutepoint">03
+                                <input type="checkbox" value="4" name="minutepoint">04
+                                <input type="checkbox" value="5" name="minutepoint">05
+                                <input type="checkbox" value="6" name="minutepoint">06
+                                <input type="checkbox" value="7" name="minutepoint">07
+                                <input type="checkbox" value="8" name="minutepoint">08
+                                <input type="checkbox" value="9" name="minutepoint">09
+                            </div>
+                            <div class="imp minList">
+                                <input type="checkbox" value="10" name="minutepoint">10
+                                <input type="checkbox" value="11" name="minutepoint">11
+                                <input type="checkbox" value="12" name="minutepoint">12
+                                <input type="checkbox" value="13" name="minutepoint">13
+                                <input type="checkbox" value="14" name="minutepoint">14
+                                <input type="checkbox" value="15" name="minutepoint">15
+                                <input type="checkbox" value="16" name="minutepoint">16
+                                <input type="checkbox" value="17" name="minutepoint">17
+                                <input type="checkbox" value="18" name="minutepoint">18
+                                <input type="checkbox" value="19" name="minutepoint">19
+                            </div>
+                            <div class="imp minList">
+                                <input type="checkbox" value="20" name="minutepoint">20
+                                <input type="checkbox" value="21" name="minutepoint">21
+                                <input type="checkbox" value="22" name="minutepoint">22
+                                <input type="checkbox" value="23" name="minutepoint">23
+                                <input type="checkbox" value="24" name="minutepoint">24
+                                <input type="checkbox" value="25" name="minutepoint">25
+                                <input type="checkbox" value="26" name="minutepoint">26
+                                <input type="checkbox" value="27" name="minutepoint">27
+                                <input type="checkbox" value="28" name="minutepoint">28
+                                <input type="checkbox" value="29" name="minutepoint">29
+                            </div>
+                            <div class="imp minList">
+                                <input type="checkbox" value="30" name="minutepoint">30
+                                <input type="checkbox" value="31" name="minutepoint">31
+                                <input type="checkbox" value="32" name="minutepoint">32
+                                <input type="checkbox" value="33" name="minutepoint">33
+                                <input type="checkbox" value="34" name="minutepoint">34
+                                <input type="checkbox" value="35" name="minutepoint">35
+                                <input type="checkbox" value="36" name="minutepoint">36
+                                <input type="checkbox" value="37" name="minutepoint">37
+                                <input type="checkbox" value="38" name="minutepoint">38
+                                <input type="checkbox" value="39" name="minutepoint">39
+                            </div>
+                            <div class="imp minList">
+                                <input type="checkbox" value="40" name="minutepoint">40
+                                <input type="checkbox" value="41" name="minutepoint">41
+                                <input type="checkbox" value="42" name="minutepoint">42
+                                <input type="checkbox" value="43" name="minutepoint">43
+                                <input type="checkbox" value="44" name="minutepoint">44
+                                <input type="checkbox" value="45" name="minutepoint">45
+                                <input type="checkbox" value="46" name="minutepoint">46
+                                <input type="checkbox" value="47" name="minutepoint">47
+                                <input type="checkbox" value="48" name="minutepoint">48
+                                <input type="checkbox" value="49" name="minutepoint">49
+                            </div>
+                            <div class="imp minList">
+                                <input type="checkbox" value="50" name="minutepoint">50
+                                <input type="checkbox" value="51" name="minutepoint">51
+                                <input type="checkbox" value="52" name="minutepoint">52
+                                <input type="checkbox" value="53" name="minutepoint">53
+                                <input type="checkbox" value="54" name="minutepoint">54
+                                <input type="checkbox" value="55" name="minutepoint">55
+                                <input type="checkbox" value="56" name="minutepoint">56
+                                <input type="checkbox" value="57" name="minutepoint">57
+                                <input type="checkbox" value="58" name="minutepoint">58
+                                <input type="checkbox" value="59" name="minutepoint">59
+                            </div>
+                        </div>
+
+                        <!--小时选择-->
+                        <div class="form-group tab-pane fade" title="小时" id="hour">
+                            <div class="line">
+                                <input type="radio" name="hour" checked id="hour_appoint" value="*">
+                                不指定</div>
+                            <div class="line">
+                                <input type="radio" name="hour" id="hour_appoint">
+                                指定</div>
+                            <div class="imp hourList">
+                                <input type="checkbox" value="0" name="hourpoint">00
+                                <input type="checkbox" value="1" name="hourpoint">01
+                                <input type="checkbox" value="2" name="hourpoint">02
+                                <input type="checkbox" value="3" name="hourpoint">03
+                                <input type="checkbox" value="4" name="hourpoint">04
+                                <input type="checkbox" value="5" name="hourpoint">05
+                                <input type="checkbox" value="6" name="hourpoint">06
+                                <input type="checkbox" value="7" name="hourpoint">07
+                                <input type="checkbox" value="8" name="hourpoint">08
+                                <input type="checkbox" value="9" name="hourpoint">09
+                            </div>
+                            <div class="imp hourList">
+                                <input type="checkbox" value="10" name="hourpoint">10
+                                <input type="checkbox" value="11" name="hourpoint">11
+                                <input type="checkbox" value="12" name="hourpoint">12
+                                <input type="checkbox" value="13" name="hourpoint">13
+                                <input type="checkbox" value="14" name="hourpoint">14
+                                <input type="checkbox" value="15" name="hourpoint">15
+                                <input type="checkbox" value="16" name="hourpoint">16
+                                <input type="checkbox" value="17" name="hourpoint">17
+                                <input type="checkbox" value="18" name="hourpoint">18
+                                <input type="checkbox" value="19" name="hourpoint">19
+                            </div>
+                            <div class="imp hourList">
+                                <input type="checkbox" value="20" name="hourpoint">20
+                                <input type="checkbox" value="21" name="hourpoint">21
+                                <input type="checkbox" value="22" name="hourpoint">22
+                                <input type="checkbox" value="23" name="hourpoint">23
+                            </div>
+                        </div>
+
+                        <!--天选择-->
+                        <div class="form-group tab-pane fade" title="天" id="day">
+                            <div class="line">
+                                <input type="radio" name="day" checked id="day_appoint" value="*">
+                                不指定</div>
+                            <div class="line">
+                                <input type="radio" name="day" id="day_appoint">
+                                指定</div>
+                            <div class="imp dayList">
+                                <input type="checkbox" value="1" name="daypoint">01
+                                <input type="checkbox" value="2" name="daypoint">02
+                                <input type="checkbox" value="3" name="daypoint">03
+                                <input type="checkbox" value="4" name="daypoint">04
+                                <input type="checkbox" value="5" name="daypoint">05
+                                <input type="checkbox" value="6" name="daypoint">06
+                                <input type="checkbox" value="7" name="daypoint">07
+                                <input type="checkbox" value="8" name="daypoint">08
+                                <input type="checkbox" value="9" name="daypoint">09
+                                <input type="checkbox" value="10" name="daypoint">10
+                            </div>
+                            <div class="imp dayList">
+                                <input type="checkbox" value="11" name="daypoint">11
+                                <input type="checkbox" value="12" name="daypoint">12
+                                <input type="checkbox" value="13" name="daypoint">13
+                                <input type="checkbox" value="14" name="daypoint">14
+                                <input type="checkbox" value="15" name="daypoint">15
+                                <input type="checkbox" value="16" name="daypoint">16
+                                <input type="checkbox" value="17" name="daypoint">17
+                                <input type="checkbox" value="18" name="daypoint">18
+                                <input type="checkbox" value="19" name="daypoint">19
+                                <input type="checkbox" value="20" name="daypoint">20
+                            </div>
+                            <div class="imp dayList">
+                                <input type="checkbox" value="21" name="daypoint">21
+                                <input type="checkbox" value="22" name="daypoint">22
+                                <input type="checkbox" value="23" name="daypoint">23
+                                <input type="checkbox" value="24" name="daypoint">24
+                                <input type="checkbox" value="25" name="daypoint">25
+                                <input type="checkbox" value="26" name="daypoint">26
+                                <input type="checkbox" value="27" name="daypoint">27
+                                <input type="checkbox" value="28" name="daypoint">28
+                                <input type="checkbox" value="29" name="daypoint">29
+                                <input type="checkbox" value="30" name="daypoint">30
+                            </div>
+                            <div class="imp dayList">
+                                <input type="checkbox" value="31" name="daypoint">31
+                            </div>
+                        </div>
+
+                        <!--月选择-->
+                        <div class="form-group tab-pane fade" title="月" id="month">
+                            <div class="line">
+                                <input type="radio" name="month" checked id="month_appoint" value="*">
+                                不指定</div>
+                            <div class="line">
+                                <input type="radio" name="month" id="month_appoint">
+                                指定</div>
+                            <div class="imp dayList">
+                                <input type="checkbox" value="1" name="monthpoint">01
+                                <input type="checkbox" value="2" name="monthpoint">02
+                                <input type="checkbox" value="3" name="monthpoint">03
+                                <input type="checkbox" value="4" name="monthpoint">04
+                                <input type="checkbox" value="5" name="monthpoint">05
+                                <input type="checkbox" value="6" name="monthpoint">06
+                                <input type="checkbox" value="7" name="monthpoint">07
+                                <input type="checkbox" value="8" name="monthpoint">08
+                                <input type="checkbox" value="9" name="monthpoint">09
+                                <input type="checkbox" value="10" name="monthpoint">10
+                            </div>
+                            <div class="imp dayList">
+                                <input type="checkbox" value="11" name="monthpoint">11
+                                <input type="checkbox" value="12" name="monthpoint">12
+                            </div>
+                        </div>
+
+                        <!--星期选择-->
+                        <div class="form-group tab-pane fade" title="星期" id="week">
+                            <div class="line">
+                                <input type="radio" name="week" checked id="week_appoint" value="*">
+                                不指定</div>
+                            <div class="line">
+                                <input type="radio" name="week" id="week_appoint">
+                                指定</div>
+                            <div class="imp dayList">
+                                <input type="checkbox" value="0" name="weekpoint">0
+                                <input type="checkbox" value="1" name="weekpoint">1
+                                <input type="checkbox" value="2" name="weekpoint">2
+                                <input type="checkbox" value="3" name="weekpoint">3
+                                <input type="checkbox" value="4" name="weekpoint">4
+                                <input type="checkbox" value="5" name="weekpoint">5
+                                <input type="checkbox" value="6" name="weekpoint">6
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="modal-footer">
+                        <button id="gettime" type="button" class="btn layui-btn" data-dismiss="modal">确定
+				        </button>
+			        </div>
+			</div>
+		</div>
+        </div>
+    </div>
+
+
+    <!--分页器-->
+    <div style="text-align: right;">
+        <ul class="pagination pagination-sm">
+            <li>
+                <span class="current">
+                    Page {{ tasks.number }} of {{ tasks.paginator.num_pages }}
+                </span>
+            </li>
+            <li>
+                <a id="first" href="/task/?page=1">
+                    <span class="glyphicon glyphicon-fast-backward"></span>
+                </a>
+            </li>
+            <li>
+                {% if tasks.has_previous %}
+                <a id="previous" href="/task/?page={{ tasks.previous_page_number }}">
+                    <span class="glyphicon glyphicon-backward"></span>
+                </a>
+                {% endif %}
+            </li>
+            <li>
+                {% if tasks.has_next %}
+                <a id="next" href="/task/?page={{ tasks.next_page_number }}">
+                    <span class="glyphicon glyphicon-forward"></span>
+                </a>
+                {% endif %}
+            </li>
+            <li>
+                <a id="last" href="/task/?page={{ tasks.paginator.num_pages }}">
+                    <span class="glyphicon glyphicon-fast-forward"></span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</body>
+</html>

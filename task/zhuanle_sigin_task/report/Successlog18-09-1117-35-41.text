@@ -1,0 +1,6 @@
+[2018-09-11 17:35:42,378 - log.py] - INFO : signinstep
+[2018-09-11 17:35:42,378 - log.py] - INFO : http://10.255.12.5:8080/zhuanle/sign-in
+[2018-09-11 17:35:42,378 - log.py] - INFO : postbody
+[2018-09-11 17:35:42,379 - log.py] - INFO : {'X-KJT-Agent': '00000000-0000-0000-0000-000000000000;IMSI;Android7.0;hero2qltechn;UNKNOWN;SM-G9350;android_normal;3.0.0;WIFI;-', 'X-DEV-Label': 'android_eyJvcyI6ImFuZHJvaWQiLCJ2ZXJzaW9uIjoiMy4wLjkiLCJwYWNrYWdlcyI6ImNvbS5oYWllci5oYWlyeV8yLjIuNCIsInByb2ZpbGVfdGltZSI6MjczLCJpbnRlcnZhbF90aW1lIjoyMDkxODMsInRva2VuX2lkIjoid0lCYk1DWk9iMW5reVRUdmlkRVpmU3FLNXdDelUweVwveUFoRFhyQ0JteEFcL0VnNFEwQXpSSmt4TlMzTEpUQldsTUhOMytMZnVjRU1aUVBxME8zbVJodz09In0', 'Content-Type': 'application/json'}
+[2018-09-11 17:35:42,379 - log.py] - INFO : {'password': 'ww123456', 'account': '18300005500'}
+[2018-09-11 17:35:42,379 - log.py] - INFO : 接口测试通过

@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load bootstrap3 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+    <title>Env</title>
+    <script src="//libs.baidu.com/jquery/1.10.2/jquery.min.js">
+    </script>
+	<script src="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="../static/frame/layui/css/layui.css">
+    <link rel="stylesheet" href="../static/frame/static/css/style.css">
+    <script>
+        //搜索或者搜索分页后去根据select返回的value去确定第几个option被选中
+        $(function(){
+            edit();
+            add();
+            del();
+            paging();
+            search();
+            funisRepeat();
+        });
+        //搜索或者搜索分页后去根据select返回的value去确定第几个option被选中
+        function search(){
+            $("#select1 option").each(function(index,element){
+                if($(element).val()=={{ select }}){
+                    $(element).attr("selected",true);
+                    //console.log($(element).val());
+                    return;
+                }
+            });
+        }
+        //编辑
+        function edit(){
+            $("#btn2").click(function(){
+                $("#myAlert").css("display","none");
+                $("#myAlert1").css("display","none");
+                var count=0;
+                var env_value;
+                var env=new Array();
+                var elements=$(".ipt");
+                $("#table").find(":checkbox:checked").each(function(){
+                    env_value=$(this).parent()
+                    for (var i=0;i<elements.length;i++){
+                        env_value=env_value.next()
+                        //alert(email_value.text());
+                        env[i]=env_value.text();
+                    }
+                    //alert(env)
+                    count++;
+                });
+                if (count==1)
+                {
+                    //alert(env);
+                    for (var i=0;i<env.length-1;i++){
+                        $(elements[i]).val(env[i]);
+                    }
+                    if (env[env.length-1]=="True"){
+                        $(elements[env.length-1]).prop('checked',true);
+                    }
+                    else{
+                        $(elements[env.length-1]).removeAttr('checked');
+                    }
+                    $('#editMyModal').modal("show");
+                }
+                else{
+                    $("#myAlert").css("display","inherit");
+                }
+            });}
+        //新增
+        function add(){
+            $("#btn1").click(function(){
+                $("#myAlert").css("display","none");
+                $("#myAlert1").css("display","none");
+            });
+        }
+        //删除
+        function del(){
+            $("#btn3").click(function(){
+                var env_ids=new Array();
+                var count=0;
+                var i=0;
+                $("#myAlert").css("display","none");
+                $("#myAlert1").css("display","none");
+                $("#table").find(":checkbox:checked").each(function() {
+                    env_id = $(this).parent().next().text();
+                    if (env_id != "") {
+                        env_ids[i++] = env_id;
+                    }
+                    count++;
+                });
+                //alert(env_ids);
+                if (count==0){
+                    $("#myAlert1").css("display","inherit");
+                    return false;
+                }
+                else{
+                    $("#ipt1").val(env_ids);
+                    $("#del").submit();
+                }
+            });
+        }
+        //判断提交的表单name是否重复
+        function funisRepeat(){
+            var isRepeat;
+            isRepeat="{{ isRepeat }}";
+            if (isRepeat==1){
+                alert("项目名重复");
+            }
+        }
+        //分页
+        function paging(){
+            function merge(btn){
+                elementproject_name=$("#ipt2").val();
+                elementTesters=$("#ipt3").val();
+                elementDeveloper=$("#ipt4").val();
+                elementselect=$("#select1").val();
+                oldHref=$(btn).attr("href");
+                href=oldHref+"&project_name="+elementproject_name+"&Testers="+elementTesters+"&Developer="+elementDeveloper+"&select="+elementselect
+                $(btn).attr("href",href)
+            }
+            var elementproject_name,elementTesters,elementDeveloper,elementselect;
+            $("#first").click(function(){
+                merge(this);
+            });
+            $("#previous").click(function(){
+                merge(this);
+            });
+            $("#next").click(function(){
+                merge(this);
+            });
+            $("#last").click(function(){
+                merge(this);
+            });
+        }
+    </script>
+</head>
+<body role="document">
+    <!--环境搜索栏-->
+    <div class="page-header" >
+        <form class="navbar-form" method="GET" action="/project_search_name/">
+            <div class="form-group">
+                <input id="ipt2" name="project_name" type="text" placeholder="项目名" class="form-control" value={{ project_name }}>
+                <input  id="ipt3" name="Testers" type="text" placeholder="测试人员" class="form-control" value={{ Testers }}>
+                <input id="ipt4" name="Developer" type="text" placeholder="开发人员" class="form-control" value={{ Developer }}>
+                <select id="select1" name='select' class="form-control" >
+                    <option  value="2"  class="select">状态</option>
+                    <option value="1" class="select">启动</option>
+                    <option value="0" class="select">关闭</option>
+                </select>
+            </div>
+            <button id="btn4" type="submit" class="layui-btn" >搜索</button>
+            {% csrf_token %}
+        </form>
+    </div>
+    <!--警告框-->
+    <div id="myAlert" class="alert alert-warning" style="display: none">
+	    <a href="#" class="close" data-dismiss="alert">&times;</a>
+	    <strong>警告！</strong>编辑时只能勾选一条。
+    </div>
+    <div id="myAlert1" class="alert alert-warning" style="display: none">
+	    <a href="#" class="close" data-dismiss="alert">&times;</a>
+	    <strong>警告！</strong>删除时一定要勾选一条。
+    </div>
+    <!--按钮-->
+    <div class="btn-toolbar" role="toolbar">
+        <div class="btn-group">
+            <button id="btn1" class="layui-btn btn "  data-toggle="modal" data-target="#addMyModal" >
+                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>添加
+            </button>
+            <button id="btn2" class="layui-btn btn "  data-toggle="modal" data-target="#">
+                <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>修改
+            </button>
+            <form id="del" method="POST" action="/project_delete_data/" style="display:inline;">
+                <input id="ipt1" type="text" name="id" style="display:none"/>
+                <button id="btn3" type="onclick" class="layui-btn btn " >
+                    <span class="glyphicon glyphicon-minus" aria-hidden="true"></span>删除
+                </button>
+                {% csrf_token %}
+            </form>
+        </div>
+    </div>
+    <!--环境列表-->
+    <div>
+        <div>
+            <table id="table" class="table table-striped">
+                <tr>
+                    <th>选中</th><th>id</th><th>项目名</th><th>测试人员</th><th>开发人员</th><th>项目描述</th><th>状态</th>
+                </tr>
+                <tbody>
+                {% for project in projects %}
+                    <tr>
+                        <td id="che1"><input type="checkbox"/></td>
+                        <td>{{ project.id }}</td>
+                        <td>{{ project.project_name }}</td>
+                        <td>{{ project.Testers }}</td>
+                        <td>{{ project.Developer }}</td>
+                        <td>{{ project.project_desc }}</td>
+                        <td>{{ project.status }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- 模态框示例（Modal） -->
+    <!--新增-->
+    <div class="modal fade" id="addMyModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog" style="max-width:400px">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+					&times;
+				</button>
+				<h4 class="modal-title" id="myModalLabel">
+					新增项目
+				</h4>
+			</div>
+			<div class="modal-body">
+                <form role="form" method='POST' action="/project_add_data/">
+                    <div class="form-group">
+                        <label  for="project_name">项目名</label>
+                        <input  type="text" class="form-control" name="project_name" placeholder="请输入项目名" required>
+                    </div>
+                    <div class="form-group">
+                        <label  for="testers">测试人员</label>
+                        <input  type="text" class="form-control" name="testers" placeholder="请输入测试人员" >
+                    </div>
+                    <div class="form-group">
+                        <label  for="developer">开发人员</label>
+                        <input  type="text" class="form-control" name="developer" placeholder="请输入开发人员" >
+                    </div>
+                    <div class="form-group">
+                        <label for="project_desc">项目描述</label>
+                        <input  type="text" class="form-control" name="project_desc" placeholder="请输入项目描述">
+                    </div>
+                    <div class="form-group" >
+                        <label class="checkbox-inline">
+                            <input type="checkbox" name="status" id="optionsRadios1" checked> 状态
+                        </label>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn layui-btn" data-dismiss="modal">关闭
+				        </button>
+				        <button type="submit" class="btn layui-btn">
+					    提交
+				        </button>
+			        </div>
+                    {% csrf_token %}
+                </form>
+			</div>
+		</div><!-- /.modal-content -->
+	</div><!-- /.modal -->
+    </div>
+    <!-- 编辑 -->
+    <div class="modal fade" id="editMyModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog" style="max-width:400px">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+					&times;
+				</button>
+				<h4 class="modal-title" id="myModalLabel">
+					编辑项目
+				</h4>
+			</div>
+			<div class="modal-body">
+                <form role="form" method='POST' action="/project_edit_data/">
+                    <div class="form-group" style="display: none">
+                        <label  for="id">id</label>
+                        <input  type="text" class="ipt form-control" name="id" placeholder="请输入id" >
+                    </div>
+                    <div class="form-group">
+                        <label  for="project_name">项目名</label>
+                        <input  type="text" class="ipt form-control" name="project_name" placeholder="请输入项目名" readonly="readonly" required>
+                    </div>
+                    <div class="form-group">
+                        <label  for="testers">测试人员</label>
+                        <input  type="text" class="ipt form-control" name="testers" placeholder="请输入测试人员" >
+                    </div>
+                    <div class="form-group">
+                        <label  for="developer">开发人员</label>
+                        <input  type="text" class="ipt form-control" name="developer" placeholder="请输入开发人员" >
+                    </div>
+                    <div class="form-group">
+                        <label for="project_desc">项目描述</label>
+                        <input  type="text" class="ipt form-control" name="project_desc" placeholder="请输入项目描述">
+                    </div>
+                    <div class="form-group" >
+                        <label class="checkbox-inline">
+                            <input type="checkbox" class="ipt" name="status" id="optionsRadios1"> 状态
+                        </label>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn layui-btn" data-dismiss="modal">关闭
+				        </button>
+				        <button type="submit" class="btn layui-btn">
+					    提交
+				        </button>
+			        </div>
+                    {% csrf_token %}
+                </form>
+			</div>
+		</div><!-- /.modal-content -->
+	</div><!-- /.modal -->
+    </div>
+    <!--分页器-->
+    <div style="text-align: right;">
+        <ul class="pagination pagination-sm">
+            <li>
+                <span class="current">
+                    Page {{ projects.number }} of {{ projects.paginator.num_pages }}
+                </span>
+            </li>
+            <li>
+                <a id="first" href="/project/?page=1">
+                    <span class="glyphicon glyphicon-fast-backward"></span>
+                </a>
+            </li>
+            <li>
+                {% if projects.has_previous %}
+                <a id="previous" href="/project/?page={{ projects.previous_page_number }}">
+                    <span class="glyphicon glyphicon-backward"></span>
+                </a>
+                {% endif %}
+            </li>
+            <li>
+                {% if projects.has_next %}
+                <a id="next" href="/project/?page={{ projects.next_page_number }}">
+                    <span class="glyphicon glyphicon-forward"></span>
+                </a>
+                {% endif %}
+            </li>
+            <li>
+                <a id="last" href="/project/?page={{ projects.paginator.num_pages }}">
+                    <span class="glyphicon glyphicon-fast-forward"></span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</body>
+</html>

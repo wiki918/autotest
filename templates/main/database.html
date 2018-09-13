@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load bootstrap3 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+    <title>Env</title>
+    <script src="//libs.baidu.com/jquery/1.10.2/jquery.min.js">
+    </script>
+	<script src="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="../static/frame/layui/css/layui.css">
+    <link rel="stylesheet" href="../static/frame/static/css/style.css">
+    <script>
+        $(function(){
+            edit();
+            add();
+            del();
+            paging();
+            editport();
+            addport();
+            funisRepeat();
+        });
+        //编辑
+        function edit(){
+            $("#btn2").click(function(){
+                $("#myAlert").css("display","none");
+                $("#myAlert1").css("display","none");
+                var count=0;
+                var database=new Array();
+                var elements=$(".ipt");
+                var email_value
+                $("#table").find(":checkbox:checked").each(function(){
+                    database_value=$(this).parent()
+                    for (var i=0;i<elements.length;i++){
+                        database_value=database_value.next()
+                        //alert(database_value.text());
+                        database[i]=database_value.text();
+                    }
+                    //alert(email_subject)
+                    count++;
+                });
+                if (count==1)
+                {
+                    for (var i=0;i<database.length;i++){
+                        //alert(elements[i])
+                        if (i==1){
+                            if (database[i]==0){
+                                $("#optionsRadios3").prop('checked',true);
+                                $("#is_port1").css("display","inherit");
+                            }
+                            else if(database[i]==1){
+                                $("#optionsRadios4").prop('checked',true);
+                                $("#is_port1").css("display","none");
+                            }
+                            continue;
+                        }
+                        else if(i==2){
+                            continue;
+                        }
+                        $(elements[i]).val(database[i]);
+                    }
+                    $('#editMyModal').modal("show");
+                }
+                else{
+                    $("#myAlert").css("display","inherit");
+                }
+            });
+        }
+        //编辑根据数据库类别是否隐藏端口号
+        function editport(){
+            $("#optionsRadios3").click(function(){
+                $("#is_port1").css("display","inherit");
+            });
+            $("#optionsRadios4").click(function(){
+                $("#is_port1").css("display","none");
+            });
+        }
+        //新增
+        function add(){
+            $("#btn1").click(function(){
+                $("#myAlert").css("display","none");
+                $("#myAlert1").css("display","none");
+            });
+        }
+        //新增根据数据库类别是否隐藏端口号
+        function addport(){
+            $("#optionsRadios2").click(function(){
+                $("#is_port").css("display","none");
+            });
+            $("#optionsRadios1").click(function(){
+                $("#is_port").css("display","inherit");
+            });
+        }
+        //删除
+        function del(){
+            $("#btn3").click(function(){
+                var env_ids=new Array();
+                var count=0;
+                var i=0;
+                $("#myAlert").css("display","none");
+                $("#myAlert1").css("display","none");
+                $("#table").find(":checkbox:checked").each(function(){
+                    env_id = $(this).parent().next().text();
+                    if (env_id != ""){
+                        env_ids[i++]=env_id;
+                    }
+                    count++;
+                });
+                //alert(env_ids);
+                if (count==0){
+                    $("#myAlert1").css("display","inherit");
+                    return false;
+                }
+                else{
+                    $("#ipt1").val(env_ids);
+                    $("#del").submit();
+                }
+            });
+        }
+        //分页
+        function paging(){
+            function merge(btn){
+                elementip=$("#ipt2").val();
+                elementname=$("#ipt3").val();
+                elementtype=$("#ipt4").val();
+                oldHref=$(btn).attr("href");
+                href=oldHref+"&db_ip="+elementip+"&db_name="+elementname+"&db_typename="+elementtype
+                $(btn).attr("href",href)
+            }
+            var elementip,elementname,elementtype;
+            $("#first").click(function(){
+                merge(this);
+            });
+            $("#previous").click(function(){
+                merge(this);
+            });
+            $("#next").click(function(){
+                merge(this);
+            });
+            $("#last").click(function(){
+                merge(this);
+            });
+        }
+        //判断提交的表单备注是否重复
+        function funisRepeat(){
+            var isRepeat;
+            isRepeat="{{ isRepeat }}";
+            if (isRepeat==1){
+                alert("数据库配置重复");
+            }
+        }
+    </script>
+</head>
+<body role="document">
+    <!--环境搜索栏-->
+    <div class="page-header" >
+        <form class="navbar-form" method="GET" action="/database_search_name/">
+            <div class="form-group">
+                <input id="ipt2" name="db_ip" type="text" placeholder="ip" class="form-control" value={{ db_ip }}>
+                <input  id="ipt3" name="db_name" type="text" placeholder="数据库名称" class="form-control" value={{ db_name }}>
+                <input id="ipt4" name="db_typename" type="text" placeholder="数据库类别" class="form-control" value={{ db_typename }}>
+            </div>
+            <button id="btn4" type="submit" class="btn layui-btn" >搜索</button>
+            {% csrf_token %}
+        </form>
+    </div>
+    <!--警告框-->
+    <div id="myAlert" class="alert alert-warning" style="display: none">
+	    <a href="#" class="close" data-dismiss="alert">&times;</a>
+	    <strong>警告！</strong>编辑时只能勾选一条。
+    </div>
+    <div id="myAlert1" class="alert alert-warning" style="display: none">
+	    <a href="#" class="close" data-dismiss="alert">&times;</a>
+	    <strong>警告！</strong>删除时一定要勾选一条。
+    </div>
+    <!--按钮-->
+    <div class="btn-toolbar" role="toolbar">
+        <div class="btn-group">
+            <button id="btn1" class="btn layui-btn"  data-toggle="modal" data-target="#addMyModal" >
+                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>添加
+            </button>
+            <button id="btn2" class="btn layui-btn"  data-toggle="modal" data-target="#">
+                <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>修改
+            </button>
+            <form id="del" method="POST" action="/database_delete_data/" style="display:inline;">
+                <input id="ipt1" type="text" name="id" style="display:none"/>
+                <button id="btn3" type="onclick" class="btn layui-btn" >
+                    <span class="glyphicon glyphicon-minus" aria-hidden="true"></span>删除
+                </button>
+                {% csrf_token %}
+            </form>
+        </div>
+    </div>
+    <!--数据库列表-->
+    <div>
+        <div>
+            <table id="table" class="table table-striped">
+                <tr>
+                    <th>选择</th><th>id</th><th style="display:none;">数据库类别编号</th><th>数据库类别</th><th>数据库名称</th>
+                    <th>ip</th><th>端口</th><th>用户名</th><th>密码</th><th>备注</th>
+                </tr>
+                <tbody>
+                {% for database in databases %}
+                    <tr>
+                        <td id="che1"><input type="checkbox"/></td>
+                        <td>{{ database.id }}</td>
+                        <td style="display:none;">{{ database.db_type }}</td>
+                        <td>{{ database.db_typename }}</td>
+                        <td>{{ database.db_name }}</td>
+                        <td>{{ database.db_ip }}</td>
+                        <td>{{ database.db_port }}</td>
+                        <td>{{ database.db_user }}</td>
+                        <td>{{ database.db_password }}</td>
+                        <td>{{ database.db_remark }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- 模态框示例（Modal） -->
+    <!--新增-->
+    <div class="modal fade" id="addMyModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog" style="max-width:400px">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+					&times;
+				</button>
+				<h4 class="modal-title" id="myModalLabel">
+					新增数据库配置
+				</h4>
+			</div>
+			<div class="modal-body">
+                <form role="form" method='POST' action="/database_add_data/">
+                    <div class="form-group" >
+                        <label class="radio-inline">
+                            <input type="radio" name="db_type" id="optionsRadios1" value="Mysql" checked> Mysql
+                        </label>
+                        <label class="radio-inline">
+                            <input type="radio" name="db_type" id="optionsRadios2" value="SqlServer"> Sql Server
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label for="db_name">数据库名称</label>
+                        <input  type="text" class="form-control" name="db_name" placeholder="请输入数据库名称" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="db_ip">ip</label>
+                        <input  type="text" class="form-control" name="db_ip" placeholder="请输入ip" required>
+                    </div>
+                    <div class="form-group" id="is_port" >
+                        <label for="db_port">端口</label>
+                        <input   type="text" class="form-control" name="db_port" placeholder="请输入端口">
+                   </div>
+                    <div class="form-group">
+                        <label for="db_user">用户名</label>
+                        <input  type="text" class="form-control" name="db_user" placeholder="请输入用户名" required>
+                   </div>
+                    <div class="form-group">
+                        <label for="db_password">密码</label>
+                        <input  type="text" class="form-control" name="db_password" placeholder="请输入密码" required>
+                   </div>
+                    <div class="form-group">
+                        <label for="db_remark">备注</label>
+                        <input  type="text" class="form-control" name="db_remark" placeholder="请输入备注" required>
+                   </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn layui-btn" data-dismiss="modal">关闭
+				        </button>
+				        <button type="submit" class="btn layui-btn">
+					    提交
+				        </button>
+			        </div>
+                    {% csrf_token %}
+                </form>
+			</div>
+		</div><!-- /.modal-content -->
+	</div><!-- /.modal -->
+    </div>
+    <!-- 编辑 -->
+   <div class="modal fade" id="editMyModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog" style="max-width:400px">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+					&times;
+				</button>
+				<h4 class="modal-title" id="myModalLabel">
+					编辑数据库配置
+				</h4>
+			</div>
+			<div class="modal-body">
+                <form role="form" method='POST' action="/database_edit_data/">
+                    <div class="form-group" style="display: none">
+                        <label  for="id">id</label>
+                        <input  type="text" class="ipt form-control" name="id" placeholder="请输入id" >
+                    </div>
+                    <div class="form-group" >
+                        <label class="radio-inline">
+                            <input type="radio" name="db_type" class="ipt" id="optionsRadios3" value="Mysql"> Mysql
+                        </label>
+                        <label class="radio-inline">
+                            <input type="radio" name="db_type" class="ipt"  id="optionsRadios4" value="SqlServer"> Sql Server
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label for="db_name">数据库名称</label>
+                        <input  type="text" class="ipt form-control" name="db_name" placeholder="请输入数据库名称" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="db_ip">ip</label>
+                        <input  type="text" class="ipt form-control" name="db_ip" placeholder="请输入ip" required>
+                    </div>
+                    <div class="form-group" id="is_port1" >
+                        <label for="db_port">端口</label>
+                        <input   type="text" class="ipt form-control" name="db_port" placeholder="请输入端口">
+                   </div>
+                    <div class="form-group">
+                        <label for="db_user">用户名</label>
+                        <input  type="text" class="ipt form-control" name="db_user" placeholder="请输入用户名" required>
+                   </div>
+                    <div class="form-group">
+                        <label for="db_password">密码</label>
+                        <input  type="text" class="ipt form-control" name="db_password" placeholder="请输入密码" required>
+                   </div>
+                    <div class="form-group">
+                        <label for="db_remark">备注</label>
+                        <input  type="text" class="ipt form-control" name="db_remark" placeholder="请输入备注" readonly="readonly" required>
+                   </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn layui-btn" data-dismiss="modal">关闭
+				        </button>
+				        <button type="submit" class="btn layui-btn">
+					    提交
+				        </button>
+			        </div>
+                    {% csrf_token %}
+                </form>
+			</div>
+		</div><!-- /.modal-content -->
+	</div><!-- /.modal -->
+    </div>
+    <!--分页器-->
+    <div style="text-align: right;">
+        <ul class="pagination pagination-sm">
+            <li>
+                <span class="current">
+                    Page {{ databases.number }} of {{ databases.paginator.num_pages }}
+                </span>
+            </li>
+            <li>
+                <a id="first" href="/database/?page=1">
+                    <span class="glyphicon glyphicon-fast-backward"></span>
+                </a>
+            </li>
+            <li>
+                {% if databases.has_previous %}
+                <a id="previous" href="/database/?page={{ databases.previous_page_number }}">
+                    <span class="glyphicon glyphicon-backward"></span>
+                </a>
+                {% endif %}
+            </li>
+            <li>
+                {% if databases.has_next %}
+                <a id="next" href="/database/?page={{ databases.next_page_number }}">
+                    <span class="glyphicon glyphicon-forward"></span>
+                </a>
+                {% endif %}
+            </li>
+            <li>
+                <a id="last" href="/database/?page={{ databases.paginator.num_pages }}">
+                    <span class="glyphicon glyphicon-fast-forward"></span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</body>
+</html>
